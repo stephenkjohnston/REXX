@@ -23,7 +23,7 @@ Once it's generated, your should see a comment at the top of your JCL.
 ```
 
 ## How to use this
-Let’s get that DOCBOX macro fired up! You'll need a mainframe, the big kahuna of computers that tackles heavy-duty jobs. My macro hangs out in a dataset called `REXX.EXEC`, like a storage box stuffed with programs. Inside, `DOCBOX` is one handy tool, ready to roll. To use it, we gotta tell the mainframe where this dataset lives so you can type `DOCBOX JC` in the ISPF editor and pop out a clean JCL header.
+Let’s get that `DOCBOX` macro fired up! You'll need a mainframe, the big kahuna of computers that tackles heavy-duty jobs. My macro hangs out in a dataset called `REXX.EXEC`, like a storage box stuffed with programs. Inside, `DOCBOX` is one handy tool, ready to roll. To use it, we gotta tell the mainframe where this dataset lives so you can type `DOCBOX JC` in the ISPF editor and pop out a clean JCL header.
 
 ```
  TSO ALLOC FI(SYSEXEC) DA(REXX.EXEC) SHR REUSE  
