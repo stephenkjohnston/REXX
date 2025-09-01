@@ -11,14 +11,14 @@
 /*****************************************************************************/
 
 /* using the native function */
-say reverse("hi")
-say reverse("hello")
-say reverse("rexx")
+say "reverse("hi")    = " reverse("hi")
+say "reverse("hello") = " reverse("hello")
+say "reverse("rexx")  = " reverse("rexx")
 
 /* using a custom function */
-say "hi    = " reverse_string("hi")
-say "hello = " reverse_string("hello")
-say "rexx  = " reverse_string("rexx")
+say "reverse_string(""hi"")    = " reverse_string("hi")
+say "reverse_string(""hello"") = " reverse_string("hello")
+say "reverse_string(""rexx"")  = " reverse_string("rexx")
 
 exit 0
 
@@ -29,7 +29,10 @@ reverse_string: procedure
 
     if word <> "" then do
         do i = 1 to length(word)
-            reversed_word = substr(word, i, 1) || reversed_word
+            character = substr(word, i, 1)
+            if datatype(character, 'M') then do
+                reversed_word = character || reversed_word
+            end
         end
     end
 
