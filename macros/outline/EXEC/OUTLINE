@@ -1,0 +1,142 @@
+/* REXX */                                            
+ADDRESS ISREDIT                                       
+"MACRO"                                               
+"(LINES) = LINENUM .ZLAST"                            
+                                                      
+ADDRESS ISPEXEC                                       
+dsn = "'STEVEJ.CBT.FILENNNN.PANELS'"                  
+"LIBDEF ISPPLIB LIBRARY ID(ISPPLIB) DATASET ID("dsn")"
+
+/* Initialize table */                        
+tblnme = "OUTL"RANDOM(1000,9999)              
+"TBCREATE" tblnme "NAMES(OTYPE ONAME) NOWRITE"
+"TBTOP" tblnme                                
+
+DO i = 1 TO LINES                                  
+   ADDRESS ISREDIT                                 
+   "(LINE) = LINE" i                               
+   line = STRIP(line)                              
+                                                   
+   /* Skip comments */                             
+   IF LEFT(line, 2) = "/*" | line = "" THEN ITERATE
+                                                   
+   IF RIGHT(line, 1) = ":" THEN                    
+   DO                                              
+      ADDRESS ISPEXEC                              
+      SEL   = ''                                   
+      OTYPE = "[F]"                                
+      ONAME = STRIP(TRANSLATE(line, " ", ":"))     
+      "TBADD" tblnme                               
+   END                                             
+   ELSE IF POS("=", line) > 0 THEN                              
+   DO                                                           
+      PARSE VAR line varname "=" rest                           
+                                                                
+      IF WORDPOS(varname,"IF WHEN SELECT DO THEN ELSE") = 0 THEN
+      DO                                                        
+         IF varname \= "" & rest \= "" THEN                     
+         DO                                                     
+            ADDRESS ISPEXEC                                     
+            SEL = ''                                            
+            OTYPE = '[V]'                                       
+            ONAME = varname                                     
+            "TBADD" tblnme                                      
+         END                                                    
+      END                                                       
+   END                                                          
+END                                                             
+
+ADDRESS ISPEXEC                                        
+"ADDPOP ROW(3) COLUMN(5)"                              
+"TBTOP" tblnme                                         
+                                                       
+DO FOREVER                                             
+   "TBDISPL" tblnme "PANEL(PNLOUTLN)"                  
+   disprc = RC                                         
+                                                       
+   IF disprc > 4 THEN LEAVE                            
+                                                       
+   IF ZTDSELS > 1 THEN                                 
+   DO                                                  
+      zerrtp = 'ACTION'                                
+      zerrsm = 'Multi Select'                          
+      zerrlm = 'Please only select one item at a time.'
+      SSEL = ''                                        
+      "SETMSG MSG(ISRZ003)"                            
+   END                                      
+   ELSE                                     
+   DO                                       
+      IF SSEL = "S" | ZCPOS = "ONAME" THEN  
+      DO                                    
+         "TBTOP" tblnme                     
+         "TBSKIP" tblnme "NUMBER("picked")" 
+                                            
+         ADDRESS ISREDIT                    
+         SELECT                             
+           WHEN otype = "[F]" THEN          
+           DO                               
+              "FIND '"STRIP(oname)":' FIRST"
+              IF RC = 0 THEN                
+              DO                            
+                 "(LINE) = CURSOR"                
+                 "LOCATE" LINE                              
+              END                                           
+           END                                              
+           WHEN otype = "[V]" THEN                          
+           DO                                               
+              "FIND '"STRIP(oname)" =' FIRST"               
+              IF RC \= 0 THEN "FIND '"STRIP(oname)"=' FIRST"
+              IF RC = 0 THEN                                
+              DO                                            
+                                                            
+              END                                           
+           END                                              
+           OTHERWISE NOP                                    
+                                                            
+         END                                                                 
+         SSEL = ''                   
+         LEAVE                       
+      END                            
+   END                               
+                                     
+   ADDRESS ISPEXEC                   
+   "TBDISPL "tblnme" PANEL(PNLOUTLN)"
+   DISPRC = RC                       
+                                     
+END                                  
+     
+ADDRESS ISPEXEC
+"REMPOP"       
+"TBEND" tblnme 
+               
+EXIT           
+
+/* ----------------------------------------------------------- * 
+ * Name   : detect_language                                    * 
+ *                                                             * 
+ * Purpose: Determine the language being used in the current   * 
+ *          member.                                            * 
+ *                                                             * 
+ * Returns:                                                    * 
+ *    lang - UNKNOWN (Default)                                 * 
+ *           COBOL                                             * 
+ *           REXX                                              * 
+ *           JCL                                               * 
+ * ----------------------------------------------------------- */
+detect_language:                                                 
+                                                                 
+  lang = 'UNKNOWN'                                               
+                                                                 
+  ADDRESS ISREDIT "(line1) = LINE 1"                             
+
+  SELECT                                                
+     WHEN LEFT(line1, 2) = '//' THEN                    
+       lang = 'JCL'                                     
+     WHEN WORDPOS('REXX', line1) > 0 THEN               
+       lang = 'REXX'                                    
+     WHEN POS('IDENTIFICATION DIVISION', line1) > 0 THEN
+       lang = 'COBOL'                                   
+     OTHERWISE NOP                                      
+  END                                                   
+                                                        
+  RETURN lang                                           

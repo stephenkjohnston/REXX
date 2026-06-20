@@ -1,0 +1,59 @@
+)ATTR                                                                
+ $ type(input) hilite(uscore) caps(on)              /* Input field */
+ ! type(text)   caps(on) intens(low) color(yellow)  /* Static text */
+ { type(output) pas(on) intens(low) color(turq)     /* Name field  */
+ } type(output) pas(on) intens(high) color(green)   /* Type field  */
+)BODY WINDOW(62,14)                                                  
+%Command ===>_ZCMD                          %Scroll ===>_ZAMT        
+%                                                                    
+! Legend: [V]ariable, [F]unction                                     
+%                                                                    
+%    Type    Name                                                    
+% -  -----   -----------------------------------------------         
+)MODEL                                                               
+ $z+{z      }z                                                       
+)INIT                                                                
+
+ /* ------------------------------------------------------ */
+ /* Initialization Section: Runs before panel is displayed */
+ /* ------------------------------------------------------ */
+                                                             
+ /* ------------------------------------------------------ */
+ /* Define names for generic Z fields in panel body        */
+ /*                                                        */
+ /* Names:                                                 */
+ /*   SSEL - Selection input                               */
+ /*   OTYPE - [V]ariable or [F]unction                     */
+ /*   ONAME - Variable/Function name                       */
+ /*                                                        */
+ /* ------------------------------------------------------ */
+ .ZVARS   = '(ssel otype oname)'                             
+                                                             
+ /* Define the title text for the pop-up window           */ 
+ &ZWINTTL = 'Outline'                                        
+                                                                                                                      
+ /* Initialize the selection tracking variable to zero    */ 
+ &PICKED = 0                                                 
+)REINIT                                                      
+                                                             
+ /* ------------------------------------------------------ */
+ /* Reinitialization Section: Runs when panel redisplays.  */
+ /* ------------------------------------------------------ */
+                                                             
+ /* Reset selection tracking before the screen redraws    */ 
+ &PICKED = 0                                                 
+)PROC                                                        
+                                                             
+  /* ----------------------------------------------------- */
+  /* Processing Section: Runs after user presses Enter/PFK */
+  /* ----------------------------------------------------- */
+                                                             
+  /* Capture the field name where the cursor is positioned */
+  &ZCPOS = .CURSOR                                           
+                                                             
+  /* Capture the table/list row number matching the cursor */
+  &PICKED = .CSRROW                                          
+                                                             
+  /* Validate: Ensure user only entered 'S' (or blank)     */
+  VER(&SSEL, LIST, S)                                        
+)END                                                           
