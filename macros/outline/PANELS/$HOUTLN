@@ -1,0 +1,17 @@
+)ATTR DEFAULT(%+_)                                                      
+                                                                        
+)BODY EXPAND(\\)                                                        
+%TUTORIAL+\-\%OUTLINE+\-\%TUTORIAL                                      
++                                                                       
++The Outline dialog processes the current source member and displays    
++a list of functions and variables.                                     
++                                                                       
++Legend:                                                                
++ %(V)+ariable - Indicates a variable definition or assignment          
++ %(F)+unction - Indicates a function, subroutine, or label             
++                                                                       
++Line Commands:                                                         
++  %S+- Select a symbol to position the editor.                         
++                                                                       
++                                                %PF3+- Return to panel 
+)END                                                                    
