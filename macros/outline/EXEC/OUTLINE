@@ -1,4 +1,22 @@
-/* REXX */                                            
+/* -------------------- REXX ------------------------- * 
+ * Name: OUTLINE               Version 1.0    05/19/26 * 
+ *                                                     * 
+ * Purpose: Shows a symbol tree of the currently       * 
+ *          active member in a popup panel. Users can  * 
+ *          select any symbol and jump directly to     * 
+ *          that location.                             * 
+ *                                                     * 
+ * Author: Stephen Johnston                            * 
+ *  Email: stephenjohnston@protonmail.com              * 
+ *  URL  : https://stephen.codes                       * 
+ *                                                     * 
+ * ******************* CHANGE LOG ******************** * 
+ * Date       Name   Description                       * 
+ * ---------- ------ --------------------------------- * 
+ * 06/24/2025 STEVEJ Make parser more modular.         *
+ * 05/09/2026 STEVEJ Initial version.                  * 
+ * --------------------------------------------------- */
+
 ADDRESS ISREDIT                                       
 "MACRO"                                               
 "(LINE1) = LINE 1"                                    
@@ -15,16 +33,14 @@ CALL detect_language
                                               
 IF WORDPOS(lang, valid_langs) = 0 THEN        
 DO                                            
-   zerrtp = 'ACTION'                          
-   zerrsm = 'UNKNOWN Language'                
-   zerrlm = 'Valid languages are: 'valid_langs
-                                              
-   "SETMSG MSG(ISRZ003)"                      
-                                              
-   EXIT 12                                    
+   zedsmsg = 'UNKNOWN Language.'               
+   zedlmsg = 'Valid languages are: 'valid_langs
+   zerralm = 'YES'                             
+   "SETMSG MSG(ISRZ001)"                       
+   EXIT 12                                                                 
 END                                           
 
-/* Initialize table */                        
+/* Initialize temporary table */  
 tblnme = "OUTL"RANDOM(1000,9999)              
 "TBCREATE" tblnme "NAMES(OTYPE ONAME) NOWRITE"
 "TBTOP" tblnme                                
@@ -46,60 +62,69 @@ ADDRESS ISPEXEC
 "ADDPOP ROW(3) COLUMN(5)"            
 "TBTOP" tblnme                       
                                      
-DO FOREVER                           
-   "TBDISPL" tblnme "PANEL(PNLOUTLN)"
-   disprc = RC                       
-                                     
-   IF disprc > 4 THEN LEAVE          
-                                     
-   IF ZTDSELS > 1 THEN               
-   DO                                
-      zerrtp = 'ACTION'                                            
-      zerrsm = 'Multi Select'                          
-      zerrlm = 'Please only select one item at a time.'
-      SSEL = ''                                        
-      "SETMSG MSG(ISRZ003)"                            
+DO FOREVER           
+   "TBDISPL" tblnme "PANEL(PNLOUTLN)"                  
+   disprc = RC                                         
+                                                       
+   IF disprc > 4 THEN LEAVE                            
+                                                       
+   IF ZTDSELS > 1 THEN                                 
+   DO                                                  
+      ADDRESS ISPEXEC                                   
+      zedsmsg = 'Multi Select'                          
+      zedlmsg = 'Please only select one item at a time.'
+      zerralm = 'YES'                                   
+      "SETMSG MSG(ISRZ001)"    
+      SSEL    = ''                                                   
       "TBTOP" tblnme                                   
    END                                                 
    ELSE                                                
    DO                                                  
-      IF SSEL = "S" | ZCPOS = "ONAME" THEN             
-      DO                                               
-         "TBTOP" tblnme                                
-         "TBSKIP" tblnme "NUMBER("picked")"            
-                                                       
-         ADDRESS ISREDIT                               
-         SELECT                                        
-           WHEN otype = "(F) " THEN                    
-           DO                                          
-              "FIND '"STRIP(oname)":' FIRST"                
-              IF RC = 0 THEN                                
-              DO                                            
-                 "(LINE) = CURSOR"                          
-                 "LOCATE" LINE                              
-              END                                           
-           END                                              
-           WHEN otype = "(V) " THEN                         
-           DO                                               
-              "FIND '"STRIP(oname)" =' FIRST"               
-              IF RC \= 0 THEN "FIND '"STRIP(oname)"=' FIRST"
-              IF RC = 0 THEN                                
-              DO                                            
-                                                            
-              END                                           
-          END                       
-          OTHERWISE NOP             
-                                    
-        END                         
-        SSEL = ''                   
-        LEAVE                       
-     END                            
-  END                               
-                                    
-  ADDRESS ISPEXEC                   
-  "TBDISPL "tblnme" PANEL(PNLOUTLN)"
-  DISPRC = RC                       
-                                      
+      IF SSEL = "S" | ZCPOS = "ONAME" THEN    
+      DO                                      
+         "TBTOP" tblnme                       
+         "TBSKIP" tblnme "NUMBER("picked")"   
+
+         ADDRESS ISREDIT                                            
+         SELECT                                                     
+            WHEN otype = "(F)" THEN                                  
+            DO                                                       
+               "FIND '"STRIP(oname)":' FIRST"                        
+               IF RC \= 0 THEN                                       
+               DO                                                    
+                  ADDRESS ISPEXEC                                    
+                  zedsmsg = 'Not Found.'                             
+                  zedlmsg = "Routine '"STRIP(oname)"' could not be" ,
+                              "located in the source."                 
+                  zerralrm = 'YES'                                   
+                  "SETMSG MSG(ISRZ001)"                              
+               END                                                   
+            END                                                      
+            
+            WHEN otype = "(V)" THEN                                   
+            DO                                                        
+               "FIND '"STRIP(oname)" =' FIRST"                        
+               IF RC \= 0 THEN                                        
+               DO                                                     
+                  ADDRESS ISPEXEC                                     
+                  zedsmsg = 'Not Found.'                              
+                  zedlmsg = "Variable '"STRIP(oname)"' could not be" ,
+                              "located in the source."                  
+                  zerralrm = 'YES'                                    
+                  "SETMSG MSG(ISRZ001)"                               
+               END                                                    
+            END                                                       
+            OTHERWISE NOP                                             
+         END
+         SSEL = ''
+         LEAVE                                                                                                    
+      END
+   END 
+
+   ADDRESS ISPEXEC                   
+   "TBDISPL "tblnme" PANEL(PNLOUTLN)"
+   DISPRC = RC                                                                  
+   
 END                                   
                                       
 ADDRESS ISPEXEC                       
@@ -121,22 +146,22 @@ EXIT
  *           JCL                                               * 
  * ----------------------------------------------------------- */
 detect_language:                                                 
-                                                                 
-  lang = 'UNKNOWN'                                               
-                                                      
-  ADDRESS ISREDIT "(line1) = LINE 1"                     
+                                                                  
+   lang = 'UNKNOWN'                                               
                                                          
-  SELECT                                                 
-     WHEN LEFT(line1, 2) = '//' THEN                     
-       lang = 'JCL'                                      
-     WHEN WORDPOS('REXX', line1) > 0 THEN                
-       lang = 'REXX'                                     
-     WHEN POS('IDENTIFICATION DIVISION', line1) > 0 THEN 
-       lang = 'COBOL'                                    
-     OTHERWISE NOP                                       
-  END                                                    
-                                                         
-  RETURN lang                                            
+   ADDRESS ISREDIT "(line1) = LINE 1"                     
+                                                            
+   SELECT                                                 
+      WHEN LEFT(line1, 2) = '//' THEN                     
+         lang = 'JCL'                                      
+      WHEN WORDPOS('REXX', line1) > 0 THEN                
+         lang = 'REXX'                                     
+      WHEN POS('IDENTIFICATION DIVISION', line1) > 0 THEN 
+         lang = 'COBOL'                                    
+      OTHERWISE NOP                                       
+   END                                                    
+                                                            
+   RETURN lang                                            
                                                                                                                               
                                                                  
 /* ----------------------------------------------------------- * 
@@ -151,23 +176,23 @@ process_lines:
                                                                  
   ADDRESS ISREDIT                                                
                                                                  
-  DO i = 1 TO lines                                              
-                                                                 
-     "(LINE) = LINE" i                                           
-     line = STRIP(line)                               
-                                      
-     SELECT                           
-        WHEN lang = "REXX" THEN       
-           CALL parse_rexx line       
-        WHEN lang = "COBOL" THEN      
-           CALL parse_cobol line      
-        WHEN lang = "JCL" THEN        
-           CALL parse_jcl             
-        OTHERWISE NOP                 
-     END                              
-  END                                 
-                                      
-  RETURN                              
+   DO i = 1 TO lines                                              
+                                                                  
+      "(LINE) = LINE" i                                           
+      line = STRIP(line)                               
+                                       
+      SELECT                           
+         WHEN lang = "REXX" THEN       
+            CALL parse_rexx line       
+         WHEN lang = "COBOL" THEN      
+            CALL parse_cobol line      
+         WHEN lang = "JCL" THEN        
+            CALL parse_jcl             
+         OTHERWISE NOP                 
+      END                              
+   END                                 
+                                       
+   RETURN                              
 
                                                                  
 /* ----------------------------------------------------------- * 
@@ -178,42 +203,43 @@ process_lines:
  *                                                             * 
  * Called By: process_lines                                    * 
  * ----------------------------------------------------------- */
-parse_rexx:                                                      
-                                                                 
-  PARSE ARG curr_line                                            
-                                                                 
-  keywords = "IF WHEN SELECT DO WHILE UNTIL ELSE OTHERWISE"      
-                                                                 
-  /* Skip comments and blank lines */                            
-  IF LEFT(curr_line, 2) = "/*" | curr_line = "" THEN RETURN      
-                                                                 
-  /* Detect routines */                                          
-  IF RIGHT(curr_line, 1) = ":" THEN                        
-  DO                                                       
-     data.0 = data.0 + 1                                   
-     num = data.0                                          
-     data.num.type = "(F)"                                 
-     data.num.name = STRIP(TRANSLATE(curr_line, " ", ":")) 
-  END                                                      
-                                                           
-  /* Detect variables */                                   
-  IF WORDPOS(WORD(curr_line,1), keywords) = 0 THEN         
-  DO                                                       
-     PARSE VAR curr_line var_name "=" rest                 
-                                                           
-     var_name = STRIP(var_name)                            
-     rest     = STRIP(rest)                                
+parse_rexx:                                                     
+                                                                  
+   PARSE ARG curr_line                                           
+                                                                  
+   keywords = "IF WHEN SELECT DO WHILE UNTIL ELSE OTHERWISE"     
+                                                                
+   /* Skip comments and blank lines */                           
+   IF LEFT(curr_line, 2) = "/*" | curr_line = "" THEN RETURN     
+                                                                
+   /* Detect routines */                                         
+   IF RIGHT(curr_line, 1) = ":" THEN                             
+   DO                                                            
+      data.0 = data.0 + 1                                        
+      num = data.0                                               
+      data.num.type = "(F)"                                      
+      data.num.name = STRIP(TRANSLATE(curr_line, " ", ":"))      
+   END                                                     
+                                                         
+   /* Detect variables */                                  
+   IF WORDPOS(WORD(curr_line,1), keywords) = 0 THEN        
+   DO                                                      
+      PARSE VAR curr_line var_name "=" rest                
+                                                            
+      var_name = STRIP(var_name)                           
+      rest     = STRIP(rest)                               
+                                                            
+      IF varname \= "" & rest \= "" THEN                   
+      DO                                                   
+         data.0 = data.0 + 1                               
+         num = data.0                                      
+         data.num.type = "(V)"                             
+         data.num.name = var_name                          
+      END                 
+   END                                            
+                                                 
+   RETURN                                                                          
 
-                                                                
-     IF varname \= "" & rest \= "" THEN                         
-     DO                                                         
-        data.0 = data.0 + 1                                     
-        num = data.0                                            
-        data.num.type = "(V)"                                   
-        data.num.name = var_name                                
-     END                                                        
-                                                                
-  RETURN                                                        
 
 /* ----------------------------------------------------------- * 
  * Name   : parse_cobol                                        * 
