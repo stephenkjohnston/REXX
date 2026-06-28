@@ -1,0 +1,9 @@
+/* REXX */                  
+                            
+data.  = ''                 
+data.0 = 0                  
+EXIT 0                      
+                            
+my_func:                    
+                            
+   RETURN                   

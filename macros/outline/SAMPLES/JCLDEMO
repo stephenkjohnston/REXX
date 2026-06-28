@@ -1,0 +1,16 @@
+//TRAIN96A JOB ,'S. JOHNSTON',MSGCLASS=H                
+//JSTEP01  EXEC PGM=IGYCRCTL,REGION=0M                  
+//*                                                     
+//STEPLIB  DD DSN=IGY.SIGYCOMP,DISP=SHR                 
+//         DD DSN=CEE.SCEERUN,DISP=SHR                  
+//         DD DSN=CEE.SCEERUN2,DISP=SHR                 
+//*                                                     
+//SYSIN    DD *                                         
+/*                                                      
+//*                                                     
+//SYSLIN   DD DSN=&&OBJMOD,UNIT=SYSDA,SPACE=(CYL,(1,1)),
+//            DISP=(,PASS,DELETE),DCB=(BLKSIZE=3200)    
+//*                                                     
+//SYSPRINT DD SYSOUT=*                                  
+//*                                                     
+//JSTEP02  EXEC PGM=IEWBLINK,COND=(0,LT)                

@@ -1,0 +1,25 @@
+       IDENTIFICATION DIVISION.                                   
+      *********************************************************** 
+      * PROGRAM NAME: ASSIGN2                                   * 
+      * PROGRAMMER  : STEPHEN JOHNSTON                          * 
+      *                                                         * 
+      * FUNCTION    : THIS PROGRAM WILL DISPLAY MY NAME         * 
+      *********************************************************** 
+       PROGRAM-ID. MYNAME.                                        
+                                                                  
+       DATA DIVISION.                                             
+       WORKING-STORAGE SECTION.                                   
+      *********************************************************** 
+      * VARIABLES:                                              * 
+      * WS-NAME    USED TO STORE MY NAME                        * 
+      *********************************************************** 
+       01 WS-NAME PIC X(20) VALUE "STEPHEN JOHNSTON".             
+                                                                  
+       PROCEDURE DIVISION.                                        
+      *********************************************************** 
+      * 0000-MAIN. THIS ROUTINE DISPLAY MY NAME                 * 
+      *********************************************************** 
+       0000-MAIN.                                                 
+           DISPLAY "MY NAME: " WS-NAME.                           
+           STOP RUN.                                              
+                                                                  
