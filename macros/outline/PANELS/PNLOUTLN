@@ -4,9 +4,7 @@
  { type(output) pas(on) intens(low) color(turq)     /* Name field  */
  } type(output) pas(on) intens(high) color(green)   /* Type field  */
 )BODY WINDOW(62,14)                                                  
-%Command ===>_ZCMD                          %Scroll ===>_ZAMT        
-%                                                                    
-! Legend: [V]ariable, [F]unction                                     
+%Command ===>_ZCMD                          %Scroll ===>_ZAMT                                           
 %                                                                    
 %    Name                                                   
 % -  -------------------------------------------------------
