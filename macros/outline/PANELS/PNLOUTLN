@@ -8,10 +8,10 @@
 %                                                                    
 ! Legend: [V]ariable, [F]unction                                     
 %                                                                    
-%    Type    Name                                                    
-% -  -----   -----------------------------------------------         
-)MODEL                                                               
- $z+{z      }z                                                       
+%    Name                                                   
+% -  -------------------------------------------------------
+)MODEL                                                      
+ $z+{z                                                              
 )INIT                                                                
 
  /* ------------------------------------------------------ */
@@ -27,7 +27,7 @@
  /*   ONAME - Variable/Function name                       */
  /*                                                        */
  /* ------------------------------------------------------ */
- .ZVARS   = '(ssel otype oname)'                             
+ .ZVARS   = '(ssel oname)'                             
                                                              
  /* Define the title text for the pop-up window           */ 
  &ZWINTTL = 'Outline'                                        
