@@ -1,0 +1,103 @@
+/* -------------------- REXX ------------------------- * 
+ * Name: PEEK                                          * 
+ *                                                     * 
+ * Purpose: Language-agnostic ISPF Edit macro to       * 
+ *          search for an occurance of a reference     * 
+ *          string and preview the surround code in    * 
+ *          a popover window.                          * 
+ *                                                     * 
+ * Author: Stephen Johnston                            * 
+ *  Email: stephenjohnston@protonmail.com              * 
+ *  URL  : https://stephen.codes                       * 
+ *                                                     * 
+ * ******************* CHANGE LOG ******************** * 
+ * Date       Name   Description                       * 
+ * ---------- ------ --------------------------------- * 
+ * 06/28/2026 STEVEJ Initial version.                  * 
+ * --------------------------------------------------- */
+                                                         
+ADDRESS ISREDIT                                         
+"MACRO (needle)"                                        
+                                                        
+lines.  = ''                                            
+lines.0 = 0                                             
+                                                        
+IF needle \= "" THEN                                    
+DO                                                      
+   "FIND FIRST '"needle"'"                              
+   find_rc = RC                                         
+                                                        
+   DO WHILE find_rc = 0                                 
+      "(LNUM) = LINENUM .ZCSR"                          
+      "(LTXT) = LINE" LNUM                              
+                                                        
+      lines.0 = lines.0 + 1                             
+      cntr = lines.0                              
+      lines.cntr.line = STRIP(LNUM, 'L', '0')     
+      lines.cntr.text = ltxt                      
+                                                  
+      "FIND NEXT '"needle"'"                      
+      find_rc = RC                                
+   END                                            
+   "RES"                                          
+   REFCNT = lines.0                               
+END                                               
+                                                  
+ADDRESS ISPEXEC                                   
+
+tblnme = "OUTL"RANDOM(1000,9999)                      
+"TBCREATE" tblnme "NAMES(REFLN REFLBL) NOWRITE"       
+                                                      
+IF lines.0 > 0 THEN                                   
+DO i = 1 TO lines.0                                   
+   refln = lines.i.line                               
+   reflbl = STRIP(lines.i.text)                       
+   "TBADD" tblnme                                     
+END                                                   
+                                                      
+"ADDPOP ROW(3) COLUMN(5)"                             
+"TBTOP" tblnme                                        
+DO FOREVER                                            
+                                                      
+   "TBDISPL" tblnme "PANEL(PEEKLIST)"                 
+   disprc = RC                                           
+                                                         
+   IF disprc > 4 THEN LEAVE                              
+                                                         
+   IF disprc = 0 THEN                                    
+   DO                                                    
+      scode = ''                                         
+      start_line = refln - 4                             
+      if start_line < 1 THEN                             
+         start_line = 1                                  
+                                                         
+      DO i = 1 TO 12                                     
+         CALL VALUE "LN"||i, ""                          
+      END                                                
+                                                         
+      current_line = start_line                          
+      DO i = 1 to 12                                
+         ADDRESS ISREDIT                            
+         "(MAXLINES) = LINENUM .ZLAST"              
+         IF current_line <= maxlines THEN           
+         DO                                         
+            "(LNTXT) = LINE" current_line           
+            LNTXT = LEFT("  "||LNTXT, 46)           
+            SCODE = SCODE || '00'x || LNTXT         
+         END                                        
+         ELSE                                       
+         DO                                         
+            LEAVE                                   
+         END                                        
+                                                    
+         current_line = current_line + 1            
+      END                                           
+                                             
+      ADDRESS ISPEXEC                        
+      "ADDPOP ROW(2) COLUMN(5)"              
+      "DISPLAY PANEL(PEEKVIEW)"              
+      "REMPOP"                               
+   END                                       
+   "TBTOP" tblnme                            
+   cmd = ''                                  
+END                                          

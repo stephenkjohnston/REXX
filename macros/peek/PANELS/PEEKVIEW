@@ -1,0 +1,10 @@
+)ATTR                                    
+ | AREA(DYNAMIC) SCROLL(ON) EXTEND(ON)   
+)BODY WINDOW(40,10)                      
+%                                      % 
+|SCODE                                 | 
+)INIT                                    
+  .CURSOR = SCODE                        
+                                         
+  &ZWINTTL = 'Source View: Line &REFLN'  
+)END                                     

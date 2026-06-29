@@ -1,0 +1,18 @@
+)ATTR                                                         
+   @ TYPE(OUTPUT)  INTENS(LOW)                                
+   # TYPE(INPUT)  PAD('_')                                    
+   ^ TYPE(TEXT)    INTENS(LOW)   COLOR(GREEN)                 
+   ! TYPE(TEXT)    INTENS(LOW)   COLOR(TURQ)                  
+)BODY WINDOW(62, 14) EXPAND(\\)                               
+%                                          %Scroll ===>_ZAMT  
+%!   ^!LINE  ^!PREVIEW                                        
+% -  ^+-------+-----------------------------------------------
+)MODEL                                                        
+ #Z  ^|@REFLN^|@REFLBL                                        
+)INIT                                                         
+  .ZVARS = '(cmd)'                                            
+                                                              
+  /* Define the panel title */                                
+  &ZWINTTL = 'REFERENCES: &NEEDLE (&REFCNT Matches) '         
+                                                              
+)END                                                          
